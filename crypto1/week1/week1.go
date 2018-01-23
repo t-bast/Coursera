@@ -3,6 +3,13 @@
 // We decrypt a cipher text after intercepting a few other cipher texts.
 package week1
 
+import (
+	"bytes"
+	"fmt"
+
+	"github.com/t-bast/coursera/crypto1/cryptoutil"
+)
+
 // InterceptedCiphers contains previously intercepted cipher texts.
 // We know they were all encrypted with the same stream cipher key.
 var InterceptedCiphers = []string{
@@ -21,5 +28,81 @@ var InterceptedCiphers = []string{
 // CipherToDecrypt is the cipher we want to decrypt.
 const CipherToDecrypt = "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904"
 
-// Hint: XOR the cipher to decrypt with each of the intercepted ciphers.
-// Try to deduce letters that come from a whitespace xor-ed with a letter.
+// WhitespacePass XORs the cipher text with intercepted ciphers and reveals
+// letters thanks to the properties of ASCII whitespace XOR-ed with ASCII letters.
+// Hint: for any ASCII letter x, x XOR ' ' = X.
+// And for any ASCII letters (x,y), x XOR y cannot be an ASCII letter.
+// So if we XOR two messages together and interpret bytes as ASCII letters,
+// when we find a valid ASCII letter it means that one of the messages contains
+// a whitespace at that position and the other contains that letter.
+// Luckily for us the input intercepted ciphers are made to make decryption easy.
+// We easily see most of the words, and then there are only a few characters for which
+// we must do a bit of manual trial and error.
+func WhitespacePass() [][]byte {
+	encrypted := cryptoutil.NewCipher(CipherToDecrypt)
+	interceptXor := make([]cryptoutil.Cipher, len(InterceptedCiphers))
+	for i, c := range InterceptedCiphers {
+		cc, err := cryptoutil.NewCipher(c).XOR(encrypted)
+		if err != nil {
+			fmt.Printf("xor failed: %s\n", err.Error())
+		}
+
+		interceptXor[i] = cc
+	}
+
+	res := make([][]byte, len(encrypted))
+	for i := 0; i < len(encrypted); i++ {
+		var candidates []byte
+		for j := 0; j < len(interceptXor); j++ {
+			b := interceptXor[j][i]
+			// Only keep letters
+			if (65 <= b && b <= 90) || (97 <= b && b <= 122) {
+				candidates = append(candidates, b)
+			}
+		}
+
+		res[i] = candidates
+	}
+
+	return res
+}
+
+// PrintCandidates prints potential decryption.
+func PrintCandidates(c [][]byte) {
+	var buffer bytes.Buffer
+	for i := 0; i < len(c); i++ {
+		switch len(c[i]) {
+		case 0:
+			buffer.WriteString("-")
+		default:
+			buffer.WriteString("(")
+			for _, b := range c[i] {
+				buffer.WriteString(fmt.Sprintf("%c", b))
+			}
+			buffer.WriteString(")")
+		}
+	}
+
+	fmt.Println(buffer.String())
+}
+
+// ComputeAllPossibilities computes all possible strings.
+// It's too expensive to run it on the whole message, but we can do it
+// word by word on subsets of the output of WhitespacePass.
+func ComputeAllPossibilities(c [][]byte) []string {
+	var rec []string
+	if len(c) == 1 {
+		rec = []string{""}
+	} else {
+		rec = ComputeAllPossibilities(c[1:])
+	}
+
+	res := make([]string, len(c[0])*len(rec))
+	for i := 0; i < len(c[0]); i++ {
+		for j := 0; j < len(rec); j++ {
+			res[i*len(rec)+j] = fmt.Sprintf("%c", c[0][i]) + rec[j]
+		}
+	}
+
+	return res
+}

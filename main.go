@@ -2,9 +2,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/t-bast/coursera/crypto1/week1"
 )
 
 func main() {
-	fmt.Println("Hello")
+	candidates := week1.WhitespacePass()
+	week1.PrintCandidates(candidates)
 }
