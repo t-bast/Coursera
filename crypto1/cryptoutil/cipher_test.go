@@ -7,6 +7,11 @@ import (
 )
 
 func TestCipher(t *testing.T) {
+	t.Run("len()", func(t *testing.T) {
+		c := NewCipher("a23c")
+		assert.Len(t, c, 2)
+	})
+
 	t.Run("String()", func(t *testing.T) {
 		c := NewCipher("a23c")
 		s := c.String()
