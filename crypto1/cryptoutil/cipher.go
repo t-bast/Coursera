@@ -34,6 +34,16 @@ func (c Cipher) Binary() string {
 	return buffer.String()
 }
 
+// ASCII returns the ASCII representation of the bytes.
+func (c Cipher) ASCII() string {
+	var buffer bytes.Buffer
+	for _, n := range c {
+		buffer.WriteString(fmt.Sprintf("%c", n))
+	}
+
+	return buffer.String()
+}
+
 // XOR does an exclusive or between two ciphers.
 func (c Cipher) XOR(c2 Cipher) (Cipher, error) {
 	b := make([]byte, max(len(c), len(c2)))
