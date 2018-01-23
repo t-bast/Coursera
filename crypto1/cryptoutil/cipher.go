@@ -44,6 +44,21 @@ func (c Cipher) ASCII() string {
 	return buffer.String()
 }
 
+// ValidASCII prints only the valid ASCII characters.
+// It prints the given replace character instead of invalid characters.
+func (c Cipher) ValidASCII(replace byte) string {
+	var buffer bytes.Buffer
+	for _, n := range c {
+		if 32 <= n && n <= 126 {
+			buffer.WriteString(fmt.Sprintf("%c", n))
+		} else {
+			buffer.WriteString(fmt.Sprintf("%c", replace))
+		}
+	}
+
+	return buffer.String()
+}
+
 // XOR does an exclusive or between two ciphers.
 func (c Cipher) XOR(c2 Cipher) (Cipher, error) {
 	b := make([]byte, max(len(c), len(c2)))

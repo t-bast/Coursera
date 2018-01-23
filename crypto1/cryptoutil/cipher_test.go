@@ -25,6 +25,12 @@ func TestCipher(t *testing.T) {
 		assert.Equal(t, "Hello", s)
 	})
 
+	t.Run("ValidASCII()", func(t *testing.T) {
+		c := NewCipher("48656cff6c6f")
+		s := c.ValidASCII(' ')
+		assert.Equal(t, "Hel lo", s)
+	})
+
 	t.Run("XOR() same length", func(t *testing.T) {
 		c1 := NewCipher("f3")
 		c2 := NewCipher("26")
