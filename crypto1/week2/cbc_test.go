@@ -58,6 +58,45 @@ func TestEncryptLength(t *testing.T) {
 	})
 }
 
+func TestEncrypt(t *testing.T) {
+	iv, err := generateRandomBytes(BlockSize)
+	require.NoError(t, err)
+	key, err := generateRandomBytes(BlockSize)
+	require.NoError(t, err)
+
+	t.Run("First encrypted block is IV", func(t *testing.T) {
+		message := []byte("hello")
+		c, err := Encrypt(iv, key, message)
+		assert.NoError(t, err)
+
+		for i := 0; i < BlockSize; i++ {
+			assert.Equal(t, iv[i], c[i])
+		}
+	})
+
+	t.Run("Encrypt message with padding block", func(t *testing.T) {
+		message := []byte("spongebob rocks!")
+		c, err := Encrypt(iv, key, message)
+		assert.NoError(t, err)
+
+		d, err := Decrypt(key, c)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "spongebob rocks!", d)
+	})
+
+	t.Run("Encrypt message with partial padding", func(t *testing.T) {
+		message := []byte("spongebob")
+		c, err := Encrypt(iv, key, message)
+		assert.NoError(t, err)
+
+		d, err := Decrypt(key, c)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "spongebob", d)
+	})
+}
+
 // generateRandomBytes generate a random byte array
 // with a given number of bytes.
 func generateRandomBytes(n int) ([]byte, error) {

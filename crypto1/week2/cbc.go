@@ -89,6 +89,6 @@ func xor(b1, b2 []byte) []byte {
 
 // Decrypt decrypts the given cipher text.
 // The cipher text needs to be correctly encoded with CBC.
-func Decrypt(key, c []byte) []byte {
-	return nil
+func Decrypt(key, c []byte) ([]byte, error) {
+	return nil, nil
 }
