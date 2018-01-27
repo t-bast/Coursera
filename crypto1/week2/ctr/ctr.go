@@ -110,9 +110,36 @@ func Decrypt(key, c []byte) ([]byte, error) {
 		return nil, fmt.Errorf("invalid key: expect %d bytes, got %d", BlockSize, len(key))
 	}
 
-	if len(c)%BlockSize != 0 {
-		return nil, fmt.Errorf("invalid cipher length %d: should be a multiple of %d", len(c), BlockSize)
+	blockCipher, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	// First block if the IV.
+	iv := c[:BlockSize]
+
+	// Remove iv from cipher for the rest of the operations.
+	c = c[BlockSize:]
+	message := make([]byte, len(c))
+
+	for i := 0; i < len(c)/BlockSize; i++ {
+		encryptedIV := make([]byte, BlockSize)
+		blockCipher.Encrypt(encryptedIV, add(iv, i))
+		block := xor(encryptedIV, c[i*BlockSize:(i+1)*BlockSize])
+		for j := 0; j < BlockSize; j++ {
+			message[i*BlockSize+j] = block[j]
+		}
+	}
+
+	// Last incomplete block if message isn't a multiple of BlockSize.
+	if len(c)%BlockSize > 0 {
+		encryptedIV := make([]byte, BlockSize)
+		blockCipher.Encrypt(encryptedIV, add(iv, len(c)/BlockSize))
+		block := xor(encryptedIV, c[len(c)-(len(c)%BlockSize):])
+		for j := 0; j < len(block); j++ {
+			message[BlockSize*(len(c)/BlockSize)+j] = block[j]
+		}
+	}
+
+	return message, nil
 }

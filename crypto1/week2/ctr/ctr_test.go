@@ -69,6 +69,17 @@ func TestEncrypt(t *testing.T) {
 
 		assert.Equal(t, "spongebob", string(d))
 	})
+
+	t.Run("Encrypt and decrypt long message", func(t *testing.T) {
+		message := []byte("hello mr spongebob")
+		c, err := Encrypt(iv, key, message)
+		assert.NoError(t, err)
+
+		d, err := Decrypt(key, c)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "hello mr spongebob", string(d))
+	})
 }
 
 // generateRandomBytes generate a random byte array
