@@ -18,6 +18,10 @@ func TestPadding(t *testing.T) {
 		assert.EqualValues(t,
 			[]byte{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3},
 			padded)
+
+		unpadded := unpad(padded)
+		assert.Len(t, unpadded, len(message))
+		assert.EqualValues(t, message, unpadded)
 	})
 
 	t.Run("Add new block if necessary", func(t *testing.T) {
@@ -30,6 +34,10 @@ func TestPadding(t *testing.T) {
 			assert.Equal(t, byte(2), padded[i])
 			assert.Equal(t, byte(BlockSize), padded[BlockSize+i])
 		}
+
+		unpadded := unpad(padded)
+		assert.Len(t, unpadded, len(message))
+		assert.EqualValues(t, message, unpadded)
 	})
 }
 
@@ -82,7 +90,7 @@ func TestEncrypt(t *testing.T) {
 		d, err := Decrypt(key, c)
 		assert.NoError(t, err)
 
-		assert.Equal(t, "spongebob rocks!", d)
+		assert.Equal(t, "spongebob rocks!", string(d))
 	})
 
 	t.Run("Encrypt message with partial padding", func(t *testing.T) {
@@ -93,7 +101,7 @@ func TestEncrypt(t *testing.T) {
 		d, err := Decrypt(key, c)
 		assert.NoError(t, err)
 
-		assert.Equal(t, "spongebob", d)
+		assert.Equal(t, "spongebob", string(d))
 	})
 }
 

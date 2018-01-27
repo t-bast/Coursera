@@ -76,6 +76,14 @@ func pad(m []byte) []byte {
 	return res
 }
 
+// unpad removes the padding added by pad.
+// It assumes that the message length is a correct decryption,
+// so its length is a multiple of BlockSize.
+func unpad(m []byte) []byte {
+	padSize := int(m[len(m)-1])
+	return m[:len(m)-padSize]
+}
+
 // xor xors two byte arrays.
 // It assumes that the arrays have the same length.
 func xor(b1, b2 []byte) []byte {
@@ -90,5 +98,29 @@ func xor(b1, b2 []byte) []byte {
 // Decrypt decrypts the given cipher text.
 // The cipher text needs to be correctly encoded with CBC.
 func Decrypt(key, c []byte) ([]byte, error) {
-	return nil, nil
+	if len(key) != BlockSize {
+		return nil, fmt.Errorf("invalid key: expect %d bytes, got %d", BlockSize, len(key))
+	}
+
+	if len(c)%BlockSize != 0 {
+		return nil, fmt.Errorf("invalid cipher length %d: should be a multiple of %d", len(c), BlockSize)
+	}
+
+	blockCipher, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	var decrypted []byte
+	for i := 0; i < (len(c)/BlockSize)-1; i++ {
+		block := make([]byte, BlockSize)
+		blockCipher.Decrypt(block, c[(i+1)*(BlockSize):(i+2)*BlockSize])
+		decryptedBlock := xor(
+			block[:],
+			c[i*BlockSize:(i+1)*BlockSize],
+		)
+		decrypted = append(decrypted, decryptedBlock...)
+	}
+
+	return unpad(decrypted), nil
 }
