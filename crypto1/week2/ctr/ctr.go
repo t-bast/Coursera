@@ -4,6 +4,7 @@ package ctr
 import (
 	"crypto/aes"
 	"fmt"
+	"math/big"
 )
 
 // BlockSize is the size of the message blocks.
@@ -56,7 +57,7 @@ func Encrypt(iv, key, m []byte) ([]byte, error) {
 		)
 
 		for j := 0; j < len(encryptedBlock); j++ {
-			res[BlockSize*(len(m)/BlockSize)+j] = encryptedBlock[j]
+			res[BlockSize*(1+len(m)/BlockSize)+j] = encryptedBlock[j]
 		}
 	}
 
@@ -64,16 +65,42 @@ func Encrypt(iv, key, m []byte) ([]byte, error) {
 }
 
 // add adds an integer to an IV (which means it has BlockSize length).
+// Since messages are small we can limit n to an int16.
 func add(b []byte, n int) []byte {
-	// TODO
-	return b
+	iv := new(big.Int)
+	iv.SetBytes(b)
+
+	nn := new(big.Int)
+	nn.SetInt64(int64(n))
+
+	iv.Add(iv, nn)
+	unpadded := iv.Bytes()
+	res := make([]byte, BlockSize)
+	for i := 0; i < len(unpadded); i++ {
+		res[BlockSize-len(unpadded)+i] = unpadded[i]
+	}
+
+	return res
 }
 
 // xor xors two byte arrays together.
 // The arrays can have different length, the smallest one will be used.
 func xor(b1, b2 []byte) []byte {
-	// TODO
-	return nil
+	var smallest, biggest []byte
+	if len(b1) > len(b2) {
+		smallest = b2
+		biggest = b1
+	} else {
+		smallest = b1
+		biggest = b2
+	}
+
+	res := make([]byte, len(smallest))
+	for i := 0; i < len(res); i++ {
+		res[i] = smallest[i] ^ biggest[i]
+	}
+
+	return res
 }
 
 // Decrypt decrypts the given cipher text.
