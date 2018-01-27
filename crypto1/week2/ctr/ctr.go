@@ -1,7 +1,10 @@
 // Package ctr implements the CTR rand scheme with a random IV.
 package ctr
 
-import "fmt"
+import (
+	"crypto/aes"
+	"fmt"
+)
 
 // BlockSize is the size of the message blocks.
 // We use AES 128.
@@ -18,7 +21,59 @@ func Encrypt(iv, key, m []byte) ([]byte, error) {
 		return nil, fmt.Errorf("invalid key: expect %d bytes, got %d", BlockSize, len(key))
 	}
 
-	return nil, nil
+	blockCipher, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]byte, len(m)+BlockSize)
+
+	// The first block contains the IV
+	for i := 0; i < BlockSize; i++ {
+		res[i] = iv[i]
+	}
+
+	for i := 0; i < len(m)/BlockSize; i++ {
+		encryptedIV := make([]byte, BlockSize)
+		blockCipher.Encrypt(encryptedIV, add(iv, i))
+		encryptedBlock := xor(
+			encryptedIV,
+			m[i*BlockSize:(i+1)*BlockSize],
+		)
+
+		for j := 0; j < BlockSize; j++ {
+			res[(i+1)*BlockSize+j] = encryptedBlock[j]
+		}
+	}
+
+	// Last incomplete block if message isn't a multiple of BlockSize.
+	if len(m)%BlockSize > 0 {
+		encryptedIV := make([]byte, BlockSize)
+		blockCipher.Encrypt(encryptedIV, add(iv, len(m)/BlockSize))
+		encryptedBlock := xor(
+			encryptedIV,
+			m[len(m)-(len(m)%BlockSize):],
+		)
+
+		for j := 0; j < len(encryptedBlock); j++ {
+			res[BlockSize*(len(m)/BlockSize)+j] = encryptedBlock[j]
+		}
+	}
+
+	return res, nil
+}
+
+// add adds an integer to an IV (which means it has BlockSize length).
+func add(b []byte, n int) []byte {
+	// TODO
+	return b
+}
+
+// xor xors two byte arrays together.
+// The arrays can have different length, the smallest one will be used.
+func xor(b1, b2 []byte) []byte {
+	// TODO
+	return nil
 }
 
 // Decrypt decrypts the given cipher text.
