@@ -2,10 +2,21 @@
 package main
 
 import (
-	"github.com/t-bast/coursera/crypto1/week1"
+	"fmt"
+
+	"github.com/t-bast/coursera/crypto1/cryptoutil"
+	"github.com/t-bast/coursera/crypto1/week2/ctr"
 )
 
 func main() {
-	candidates := week1.WhitespacePass()
-	week1.PrintCandidates(candidates)
+	b, err := ctr.Decrypt(
+		cryptoutil.NewCipher("hex key here"),
+		cryptoutil.NewCipher("hex cipher text here"))
+
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		return
+	}
+
+	fmt.Println(cryptoutil.Cipher(b).ASCII())
 }
