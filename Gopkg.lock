@@ -8,6 +8,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -15,13 +21,13 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = ["assert","require"]
   revision = "b91bfb9ebec76498946beb6af7c0230c7cc7ba6c"
   version = "v1.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a9dd4821c4522b2069722c1be94b191e7aff1736aeb5c12ab0070f87cdbc5af2"
+  inputs-digest = "b67d2649541f66764d7e640b0802db188cd4e04124b1b295cbb84c6b79230bc0"
   solver-name = "gps-cdcl"
   solver-version = 1
