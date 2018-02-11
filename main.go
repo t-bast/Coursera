@@ -4,19 +4,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/t-bast/coursera/crypto1/cryptoutil"
-	"github.com/t-bast/coursera/crypto1/week2/ctr"
+	"github.com/t-bast/coursera/crypto1/week4"
 )
 
 func main() {
-	b, err := ctr.Decrypt(
-		cryptoutil.NewCipher("hex key here"),
-		cryptoutil.NewCipher("hex cipher text here"))
-
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		return
-	}
-
-	fmt.Println(cryptoutil.Cipher(b).ASCII())
+	decryptedBytes := week4.Decrypt()
+	fmt.Println("Decrypted message:")
+	fmt.Printf("%s\n", decryptedBytes)
 }
