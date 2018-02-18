@@ -24,12 +24,15 @@ func ComputeLog(p, g, h string, bpow uint) (uint64, error) {
 		return 0, errors.New("Invalid number")
 	}
 
+	fmt.Println("Computing hash table...")
 	x1s := computeHashTable(nh, ng, np, bpow)
 
+	fmt.Println("Finding matching hash...")
 	b := big.NewInt(1 << bpow)
 	gb := new(big.Int).Exp(ng, b, np)
 	x0, x1 := findMatch(gb, np, bpow, x1s)
 
+	fmt.Println("Match found!")
 	res := uint64(x0)*(1<<bpow) + uint64(x1)
 
 	return res, nil
@@ -42,6 +45,8 @@ func computeHashTable(h, g, p *big.Int, bpow uint) map[string]int {
 	// For i=0..2^bpow, we compute h/(g^i) [p]
 	// and store the result.
 	for i := 0; i <= (1 << bpow); i++ {
+		fmt.Println(i)
+
 		// Compute the inverse of g^i [p].
 		ginv := new(big.Int).ModInverse(gpow, p)
 
@@ -54,6 +59,7 @@ func computeHashTable(h, g, p *big.Int, bpow uint) map[string]int {
 
 		// Prepare next iteration.
 		gpow = gpow.Mul(gpow, g)
+		gpow = gpow.Mod(gpow, p)
 	}
 
 	return res
@@ -67,7 +73,9 @@ func findMatch(gb, p *big.Int, bpow uint, xMap map[string]int) (int, int) {
 			return i, match
 		}
 
+		// Prepare next iteration.
 		gbpow = gbpow.Mul(gbpow, gb)
+		gbpow = gbpow.Mod(gbpow, p)
 	}
 
 	fmt.Println("Could not find a solution")

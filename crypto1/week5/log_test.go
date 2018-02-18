@@ -27,6 +27,18 @@ func TestComputeHashTable(t *testing.T) {
 }
 
 func TestComputeLog(t *testing.T) {
-	x, _ := ComputeLog(p.String(), g.String(), h.String(), 2)
-	assert.Equal(t, uint64(3), x)
+	t.Run("Small", func(t *testing.T) {
+		x, _ := ComputeLog(p.String(), g.String(), h.String(), 2)
+		assert.Equal(t, uint64(3), x)
+	})
+
+	t.Run("Medium", func(t *testing.T) {
+		x, _ := ComputeLog(
+			"1073676287",
+			"1010343267",
+			"857348958",
+			10,
+		)
+		assert.Equal(t, uint64(1026831), x)
+	})
 }
