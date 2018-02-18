@@ -45,7 +45,9 @@ func computeHashTable(h, g, p *big.Int, bpow uint) map[string]int {
 	// For i=0..2^bpow, we compute h/(g^i) [p]
 	// and store the result.
 	for i := 0; i <= (1 << bpow); i++ {
-		fmt.Println(i)
+		if i%((1<<bpow)/100) == 0 {
+			fmt.Printf("%d percent\n", (100 * i / (1 << bpow)))
+		}
 
 		// Compute the inverse of g^i [p].
 		ginv := new(big.Int).ModInverse(gpow, p)
@@ -69,6 +71,10 @@ func findMatch(gb, p *big.Int, bpow uint, xMap map[string]int) (int, int) {
 	gbpow := big.NewInt(1)
 
 	for i := 0; i <= (1 << bpow); i++ {
+		if i%((1<<bpow)/100) == 0 {
+			fmt.Printf("%d percent\n", (100 * i / (1 << bpow)))
+		}
+
 		if match, ok := xMap[gbpow.String()]; ok {
 			return i, match
 		}
