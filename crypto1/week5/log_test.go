@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// For our tests, 12 = 4^9 [13] and we want to find x=9.
+// For our tests, 12 = 4^9 [13] and we want to find x=3 (because 4^3=4^9 [13]).
 // 1 <= x <= 2^4 so B=2^2.
 var (
 	p = big.NewInt(13)
@@ -24,4 +24,9 @@ func TestComputeHashTable(t *testing.T) {
 	assert.Equal(t, 2, x1s["4"])
 	assert.Equal(t, 3, x1s["1"])
 	assert.Equal(t, 4, x1s["10"])
+}
+
+func TestComputeLog(t *testing.T) {
+	x, _ := ComputeLog(p.String(), g.String(), h.String(), 2)
+	assert.Equal(t, uint64(3), x)
 }
